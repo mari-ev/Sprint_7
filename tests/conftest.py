@@ -1,30 +1,25 @@
 import pytest
-import requests
-import uuid
-from api_urls import ApiUrls
-
-
-@pytest.fixture
-def courier_data():
-    unique_id = str(uuid.uuid4())[:8]
-    return {
-        "login": f"test_courier_{unique_id}",
-        "password": "password123",
-        "firstName": f"Courier_{unique_id}",
-    }
-
+from helpers import create_and_authorize_courier, delete_courier_by_id
+from methods.courier_methods import CourierMethods
 
 @pytest.fixture(scope="function")
-def created_courier(courier_data):
-    response = requests.post(ApiUrls.CREATE_COURIER, json=courier_data, timeout=10)
-    assert response.status_code == 201
-    auth_data = {
-        "login": courier_data["login"],
-        "password": courier_data["password"],
-    }
-    login_response = requests.post(ApiUrls.LOGIN_COURIER, json=auth_data, timeout=10)
-    json_response = login_response.json()
-    courier_id = json_response["id"]
-    full_courier_info = {**courier_data, "id": courier_id}
+def created_courier():
+    full_courier_info = create_and_authorize_courier()
     yield full_courier_info
-    requests.delete(ApiUrls.get_delete_courier_url(courier_id), timeout=10)
+    delete_courier_by_id(full_courier_info["id"])
+
+@pytest.fixture
+def courier_cleanup(request):
+    couriers_to_delete = []
+
+    def register_for_cleanup(credentials):
+        couriers_to_delete.append(credentials)
+
+    def _perform_cleanup():
+        for credentials in couriers_to_delete:
+            courier_methods = CourierMethods()
+            _, _, courier_id = courier_methods.login_courier(credentials)
+            delete_courier_by_id(courier_id)
+
+    request.addfinalizer(_perform_cleanup)
+    return register_for_cleanup
