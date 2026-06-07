@@ -1,0 +1,39 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+test_env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Allure: игнорируем HTML‑отчёт, но оставляем результаты
+allure-report/
+target/allure-report/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Pytest cache
+.pytest_cache/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
